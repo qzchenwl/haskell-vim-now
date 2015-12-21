@@ -1,6 +1,33 @@
-" General {{{
+" HVN paths {{{
+" Set XDG_CONFIG_HOME/haskell-vim-now to load user's config files
+if exists($XDG_CONFIG_HOME)
+  let hvn_config_dir = $XDG_CONFIG_HOME . "/haskell-vim-now"
+else
+  let hvn_config_dir = $HOME . "/.config/haskell-vim-now"
+endif
 
-" use indentation for folds
+" Haskell Vim Now paths
+" pre config path
+let hvn_config_pre = expand(resolve(hvn_config_dir . "/vimrc.local.pre"))
+" post config path
+let hvn_config_post = expand(resolve(hvn_config_dir . "/vimrc.local"))
+" user plugins config path
+let hvn_user_plugins = expand(resolve(hvn_config_dir . "/plugins.vim"))
+
+" stack bin path symlink
+let hvn_stack_bin = expand(resolve(hvn_config_dir . "/.stack-bin"))
+" stack global path symlink
+" let hvn_stack_global = expand(resolve(hvn_config_dir . "/.stack"))
+" }}}
+
+" Precustomization {{{
+if filereadable(hvn_config_pre)
+  execute 'source '. hvn_config_pre
+endif
+" }}}
+
+" General {{{
+" Use indentation for folds
 set foldmethod=indent
 set foldnestmax=5
 set foldlevelstart=99
@@ -21,8 +48,13 @@ set autoread
 
 " With a map leader it's possible to do extra key combinations
 " like <leader>w saves the current file
-let mapleader = ","
-let g:mapleader = ","
+if ! exists("mapleader")
+  let mapleader = ","
+endif
+
+if ! exists("g:mapleader")
+  let g:mapleader = ","
+endif
 
 " Leader key timeout
 set tm=2000
@@ -37,61 +69,65 @@ set formatprg="PARINIT='rTbgqR B=.,?_A_a Q=_s>|' par\ -w72"
 autocmd FileType haskell let &formatprg="stylish-haskell"
 
 " Find custom built hasktags, codex etc
-let $PATH = $PATH . ':' . expand("~/.local/bin")
+let $PATH = $PATH . ':' . expand(hvn_stack_bin)
 
 " Kill the damned Ex mode.
 nnoremap Q <nop>
 
+" Make <c-h> work like <c-h> again (this is a problem with libterm)
+if has('nvim')
+  nnoremap <BS> <C-w>h
+endif
+
 " }}}
 
-" Vundle {{{
+" vim-plug {{{
 
 set nocompatible
-filetype off
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
 
-" let Vundle manage Vundle
-" required!
-Plugin 'gmarik/Vundle.vim'
+if has('nvim')
+  call plug#begin('~/.config/nvim/bundle')
+else
+  call plug#begin('~/.vim/bundle')
+endif
 
 " Support bundles
-Plugin 'jgdavey/tslime.vim'
-Plugin 'Shougo/vimproc.vim'
-Plugin 'ervandew/supertab'
-Plugin 'scrooloose/syntastic'
-Plugin 'moll/vim-bbye'
-Plugin 'nathanaelkane/vim-indent-guides'
-Plugin 'vim-scripts/gitignore'
+Plug 'jgdavey/tslime.vim'
+Plug 'Shougo/vimproc.vim', { 'do': 'make' }
+Plug 'ervandew/supertab'
+Plug 'scrooloose/syntastic'
+Plug 'moll/vim-bbye'
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'vim-scripts/gitignore'
 
 " Git
-Plugin 'tpope/vim-fugitive'
-Plugin 'int3/vim-extradite'
+Plug 'tpope/vim-fugitive'
+Plug 'int3/vim-extradite'
 
 " Bars, panels, and files
-Plugin 'scrooloose/nerdtree'
-Plugin 'bling/vim-airline'
-Plugin 'kien/ctrlp.vim'
-Plugin 'majutsushi/tagbar'
+Plug 'scrooloose/nerdtree'
+Plug 'bling/vim-airline'
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'majutsushi/tagbar'
 
 " Text manipulation
-Plugin 'vim-scripts/Align'
-Plugin 'vim-scripts/Gundo'
-Plugin 'tpope/vim-commentary'
-Plugin 'godlygeek/tabular'
-Plugin 'michaeljsmith/vim-indent-object'
-Plugin 'easymotion/vim-easymotion'
+Plug 'vim-scripts/Align'
+Plug 'simnalamburt/vim-mundo'
+Plug 'tpope/vim-commentary'
+Plug 'godlygeek/tabular'
+Plug 'michaeljsmith/vim-indent-object'
+Plug 'easymotion/vim-easymotion'
 
 " Allow pane movement to jump out of vim into tmux
-Plugin 'christoomey/vim-tmux-navigator'
+Plug 'christoomey/vim-tmux-navigator'
 
 " Haskell
-Plugin 'neovimhaskell/haskell-vim'
-"Plugin 'enomsg/vim-haskellConcealPlus'
-Plugin 'eagletmt/ghcmod-vim'
-Plugin 'bitc/vim-hdevtools'
-Plugin 'eagletmt/neco-ghc'
-Plugin 'Twinside/vim-hoogle'
+Plug 'neovimhaskell/haskell-vim', { 'for': 'haskell' }
+Plug 'enomsg/vim-haskellConcealPlus', { 'for': 'haskell' }
+Plug 'eagletmt/ghcmod-vim', { 'for': 'haskell' }
+Plug 'bitc/vim-hdevtools', { 'for': 'haskell' }
+Plug 'eagletmt/neco-ghc', { 'for': 'haskell' }
+Plug 'Twinside/vim-hoogle', { 'for': 'haskell' }
 
 " nodejs
 Plugin 'rking/ag.vim'
@@ -100,14 +136,15 @@ Plugin 'pangloss/vim-javascript'
 Plugin 'mxw/vim-jsx'
 
 " Colorscheme
-Plugin 'vim-scripts/wombat256.vim'
+Plug 'vim-scripts/wombat256.vim'
 
 " Custom bundles
-if filereadable(expand("~/.vim.local/bundles.vim"))
-  source ~/.vim.local/bundles.vim
+
+if filereadable(hvn_user_plugins)
+  execute 'source '. hvn_user_plugins
 endif
 
-call vundle#end()
+call plug#end()
 
 " }}}
 
@@ -142,7 +179,7 @@ set whichwrap+=<,>,h,l
 " Ignore case when searching
 set ignorecase
 
-" When searching try to be smart about cases 
+" When searching try to be smart about cases
 set smartcase
 
 " Highlight search results
@@ -193,9 +230,6 @@ try
 catch
 endtry
 
-" Enable syntax highlighting
-syntax enable
-
 " Adjust signscolumn and syntastic to match wombat
 hi! link SignColumn LineNr
 hi! link SyntasticErrorSign ErrorMsg
@@ -204,10 +238,6 @@ hi! link SyntasticWarningSign WarningMsg
 " Use pleasant but very visible search hilighting
 hi Search ctermfg=white ctermbg=173 cterm=none guifg=#ffffff guibg=#e5786d gui=none
 hi! link Visual Search
-
-" Enable filetype plugins
-filetype plugin on
-filetype indent on
 
 " Match wombat colors in nerd tree
 hi Directory guifg=#8ac6f2
@@ -231,7 +261,11 @@ endif
 set t_Co=256
 
 " Set utf8 as standard encoding and en_US as the standard language
-set encoding=utf8
+if !has('nvim')
+  " Only set this for vim, since neovim is utf8 as default and setting it
+  " causes problems when reloading the .vimrc configuration
+  set encoding=utf8
+endif
 
 " Use Unix as the standard file type
 set ffs=unix,dos,mac
@@ -239,6 +273,13 @@ set ffs=unix,dos,mac
 " Use large font by default in MacVim
 set gfn=Monaco:h19
 
+" Use powerline fonts for airline
+if !exists('g:airline_symbols')
+  let g:airline_symbols = {}
+endif
+
+let g:airline_powerline_fonts = 1
+let g:airline_symbols.space = "\ua0"
 " }}}
 
 " Files, backups and undo {{{
@@ -251,7 +292,11 @@ set noswapfile
 " Source the vimrc file after saving it
 augroup sourcing
   autocmd!
-  autocmd bufwritepost .vimrc source $MYVIMRC
+  if has('nvim')
+    autocmd bufwritepost init.vim source $MYVIMRC
+  else
+    autocmd bufwritepost .vimrc source $MYVIMRC
+  endif
 augroup END
 
 " Open file prompt with current path
@@ -264,7 +309,7 @@ nmap <silent> <leader>u :GundoToggle<CR>
 nnoremap <silent> <Leader><space> :CtrlP<CR>
 let g:ctrlp_max_files=0
 let g:ctrlp_show_hidden=1
-let g:ctrlp_custom_ignore = { 'dir': '\v[\/](.git|.cabal-sandbox)$' }
+let g:ctrlp_custom_ignore = { 'dir': '\v[\/](.git|.cabal-sandbox|.stack-work)$' }
 
 " }}}
 
@@ -373,6 +418,18 @@ noremap <leader>bd :Bd<cr>
 " fuzzy find buffers
 noremap <leader>b<space> :CtrlPBuffer<cr>
 
+" Neovim terminal configurations
+if has('nvim')
+  " Use <Esc> to escape terminal insert mode
+  tnoremap <Esc> <C-\><C-n>
+  " Make terminal split moving behave like normal neovim
+  tnoremap <c-h> <C-\><C-n><C-w>h
+  tnoremap <c-j> <C-\><C-n><C-w>j
+  tnoremap <c-k> <C-\><C-n><C-w>k
+  tnoremap <c-l> <C-\><C-n><C-w>l
+endif
+
+
 " }}}
 
 " Status line {{{
@@ -411,7 +468,7 @@ function! CmdLine(str)
   exe "menu Foo.Bar :" . a:str
   emenu Foo.Bar
   unmenu Foo
-endfunction 
+endfunction
 
 function! VisualSelection(direction, extra_filter) range
   let l:saved_reg = @"
@@ -526,7 +583,7 @@ map <leader>tg :!codex update --force<CR>:call system("git-hscope -X TemplateHas
 
 map <leader>tt :TagbarToggle<CR>
 
-set csprg=~/.local/bin/hscope
+set csprg=hscope
 set csto=1 " search codex tags first
 set cst
 set csverb
@@ -661,9 +718,8 @@ vnoremap <silent> <leader>h> :call Pointful()<CR>
 " }}}
 
 " Customization {{{
-
-if filereadable(expand("~/.vimrc.local"))
-  source ~/.vimrc.local
+if filereadable(hvn_config_post)
+  execute 'source '. hvn_config_post
 endif
 
 " }}}

@@ -1,124 +1,79 @@
 #!/usr/bin/env bash
+if which tput >/dev/null 2>&1; then
+    ncolors=$(tput colors)
+fi
 
-msg() { echo "--- $@" 1>&2; }
-detail() { echo "	$@" 1>&2; }
-verlte() {
-  [ "$1" = `echo -e "$1\n$2" | sort -t '.' -k 1,1n -k 2,2n -k 3,3n -k 4,4n | head -n1` ]
+if [ -t 1 ] && [ -n "${ncolors}" ] && [ "${ncolors}" -ge 8 ]; then
+  RED="$(tput setaf 1)"
+  GREEN="$(tput setaf 2)"
+  YELLOW="$(tput setaf 3)"
+  BOLD="$(tput bold)"
+  NORMAL="$(tput sgr0)"
+else
+  RED=""
+  GREEN=""
+  YELLOW=""
+  BOLD=""
+  NORMAL=""
+fi
+
+msg() { echo -e "${GREEN}--- $@${NORMAL}" 1>&2; }
+warn() { echo -e "${YELLOW}${BOLD}--> $@${NORMAL}" 1>&2; }
+err() { echo -e "${RED}${BOLD}*** $@${NORMAL}" 1>&2; }
+
+config_home() {
+  local cfg_home
+  if [ -z ${XDG_CONFIG_HOME+x} ]; then
+    cfg_home="${HOME}/.config"
+  else
+    cfg_home=${XDG_CONFIG_HOME}
+  fi
+  echo ${cfg_home}
+  return 0
 }
 
+update_pull() {
+  local repo_path=$1
+  cd ${repo_path} && git pull --rebase
+  return $?
+}
 
-command -v stack >/dev/null
-if [ $? -ne 0 ] ; then
-  msg "Installer requires Stack. Installation instructions:"
-  msg "https://github.com/commercialhaskell/stack#how-to-install"
-  exit 1
-fi
+install() {
+  HVN_DEST="$(config_home)/haskell-vim-now"
+  mkdir -p $(config_home)
 
-msg "Installing system package dependencies"
-command -v brew >/dev/null
-if [ $? -eq 0 ] ; then
-  msg "homebrew detected"
-  brew install git make vim ctags
-fi
-command -v apt-get >/dev/null
-if [ $? -eq 0 ] ; then
-  msg "apt-get detected"
-  sudo apt-get install -y git make vim libcurl4-openssl-dev exuberant-ctags
-fi
-command -v dnf >/dev/null
-if [ $? -eq 0 ] ; then
-  msg "dnf detected"
-  sudo dnf install -y git make vim ctags libcurl-devel zlib-devel
-fi
-command -v yum >/dev/null
-if [ $? -eq 0 ] ; then
-  msg "yum detected"
-  sudo yum install -y git make vim ctags libcurl-devel zlib-devel
-fi
+  if [ -e ${HVN_DEST} ]; then
+    warn "Existing Haskell-Vim-Now installation detected at ${HVN_DEST}."
+  elif [ -e ${HOME}/.haskell-vim-now ]; then
+    warn "Old Haskell-Vim-Now installation detected."
+    msg "Migrating existing installation to ${HVN_DEST}..."
+    mv -f ${HOME}/.haskell-vim-now ${HVN_DEST}
+    mv -f ${HOME}/.vimrc.local ${HVN_DEST}/vimrc.local
+    mv -f ${HOME}/.vimrc.local.pre ${HVN_DEST}/vimrc.local.pre
+    sed -i.bak "s/Plugin '/Plug '/g" ${HOME}/.vim.local/bundles.vim
+    mv -f ${HOME}/.vim.local/bundles.vim ${HVN_DEST}/plugins.vim
+    rm -f ${HOME}/.vim.local/bundles.vim.bak
+    rmdir ${HOME}/.vim.local >/dev/null
+  else
+    warn "No previous installations detected."
+    msg "Installing Haskell-Vim-Now..."
+    git clone https://github.com/begriffs/haskell-vim-now.git ${HVN_DEST}
 
-for i in ctags curl-config git make vim; do
-  command -v $i >/dev/null
-  if [ $? -ne 0 ] ; then
-    msg "Installer requires ${i}. Please install $i and try again."
-    exit 1
+    return 0
   fi
-done
 
-VIM_VER=$(vim --version | sed -n 's/^.*IMproved \([^ ]*\).*$/\1/p')
+  # Quick update to make sure we execute correct update procedure
+  msg "Syncing Haskell-Vim-Now with upstream..."
+  if ! update_pull ${HVN_DEST} ; then
+    err "Sync (git pull) failed. Aborting..."
+    exit 1;
+  fi
+}
 
-if ! verlte '7.4' $VIM_VER ; then
-  msg "Detected vim version \"$VIM_VER\""
-  msg "However version 7.4 or later is required. Aborting."
-  exit 1
-fi
+main() {
+  install
+  . ${HVN_DEST}/scripts/setup.sh
+  setup ${HVN_DEST}
+}
 
-endpath="$HOME/.haskell-vim-now"
-
-if [ ! -e $endpath/.git ]; then
-  msg "Cloning begriffs/haskell-vim-now"
-  git clone https://github.com/begriffs/haskell-vim-now.git $endpath
-else
-  msg "Existing installation detected"
-  msg "Updating from begriffs/haskell-vim-now"
-  cd $endpath && git pull
-fi
-
-if [ -e ~/.vim/colors ]; then
-  msg "Preserving color scheme files"
-  cp -R ~/.vim/colors $endpath/colors
-fi
-
-today=`date +%Y%m%d_%H%M%S`
-msg "Backing up current vim config using timestamp $today"
-for i in $HOME/.vim $HOME/.vimrc $HOME/.gvimrc; do [ -e $i ] && mv $i $i.$today && detail "$i.$today"; done
-
-msg "Creating symlinks"
-detail "~/.vimrc -> $endpath/.vimrc"
-detail "~/.vim   -> $endpath/.vim"
-ln -sf $endpath/.vimrc $HOME/.vimrc
-if [ ! -d $endpath/.vim/bundle ]; then
-  mkdir -p $endpath/.vim/bundle
-fi
-ln -sf $endpath/.vim $HOME/.vim
-
-if [ ! -e $HOME/.vim/bundle/Vundle.vim ]; then
-  msg "Installing Vundle"
-  git clone https://github.com/gmarik/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
-fi
-
-msg "Installing plugins using Vundle..."
-vim -T dumb -E -u $endpath/.vimrc +PluginInstall! +PluginClean! +qall
-
-msg "Building vimproc.vim"
-make -C ~/.vim/bundle/vimproc.vim
-
-msg "Setting up GHC if needed"
-stack setup
-
-msg "Adding extra stack deps if needed"
-DEPS_REGEX='s/extra-deps: \[\]/extra-deps: [cabal-helper-0.6.1.0, pure-cdb-0.1.1]/'
-# upgrade from a previous installation
-DEPS_UPGRADE_REGEX='s/cabal-helper-0.5.3.0/cabal-helper-0.6.1.0/g'
-sed -i.bak "$DEPS_REGEX" ~/.stack/global-project/stack.yaml || sed -i.bak "$DEPS_REGEX" ~/.stack/global/stack.yaml
-sed -i.bak "$DEPS_UPGRADE_REGEX" ~/.stack/global-project/stack.yaml || sed -i.bak "$DEPS_UPGRADE_REGEX" ~/.stack/global/stack.yam
-rm -f ~/.stack/global/stack.yaml.bak ~/.stack/global-project/stack.yaml.bak
-
-msg "Installing helper binaries"
-stack --resolver nightly install ghc-mod hdevtools hasktags codex hscope pointfree pointful hoogle stylish-haskell
-
-msg "Installing git-hscope"
-cp $endpath/git-hscope ~/.local/bin
-
-msg "Building Hoogle database..."
-~/.local/bin/hoogle data
-
-msg "Setting git to use fully-pathed vim for messages..."
-git config --global core.editor $(which vim)
-
-msg "Configuring codex to search in stack..."
-cat > $HOME/.codex <<EOF
-hackagePath: $HOME/.stack/indices/Hackage/
-tagsFileHeader: false
-tagsFileSorted: false
-tagsCmd: hasktags --extendedctag --ignore-close-implementation --ctags --tags-absolute --output='\$TAGS' '\$SOURCES'
-EOF
+main
