@@ -87,11 +87,17 @@ Plugin 'christoomey/vim-tmux-navigator'
 
 " Haskell
 Plugin 'neovimhaskell/haskell-vim'
-Plugin 'enomsg/vim-haskellConcealPlus'
+"Plugin 'enomsg/vim-haskellConcealPlus'
 Plugin 'eagletmt/ghcmod-vim'
 Plugin 'bitc/vim-hdevtools'
 Plugin 'eagletmt/neco-ghc'
 Plugin 'Twinside/vim-hoogle'
+
+" nodejs
+Plugin 'rking/ag.vim'
+Plugin 'sheerun/vim-polyglot'
+Plugin 'pangloss/vim-javascript'
+Plugin 'mxw/vim-jsx'
 
 " Colorscheme
 Plugin 'vim-scripts/wombat256.vim'
@@ -555,7 +561,7 @@ command! -nargs=1 GGrep call NonintrusiveGitGrep(<q-args>)
 nmap <leader>gs :Gstatus<CR>
 nmap <leader>gg :copen<CR>:GGrep 
 nmap <leader>gl :Extradite!<CR>
-nmap <leader>gd :Gdiff<CR>
+nmap <leader>gd :Gvdiff<CR>
 nmap <leader>gb :Gblame<CR>
 
 function! CommittedFiles()
