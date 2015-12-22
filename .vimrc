@@ -133,6 +133,8 @@ Plug 'Twinside/vim-hoogle', { 'for': 'haskell' }
 Plug 'vim-scripts/wombat256.vim'
 
 " Custom bundles
+Plug 'pangloss/vim-javascript', { 'for': 'javascript.jsx' }
+Plug 'mxw/vim-jsx', { 'for': 'javascript.jsx' }
 
 if filereadable(hvn_user_plugins)
   execute 'source '. hvn_user_plugins
