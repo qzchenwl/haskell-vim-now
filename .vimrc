@@ -133,6 +133,9 @@ Plug 'Twinside/vim-hoogle', { 'for': 'haskell' }
 Plug 'vim-scripts/wombat256.vim'
 
 " Custom bundles
+Plug 'rking/ag.vim'
+Plug 'mxw/vim-jsx', { 'for': 'javascript.jsx' }
+Plug 'pangloss/vim-javascript', { 'for': 'javascript.jsx' }
 
 if filereadable(hvn_user_plugins)
   execute 'source '. hvn_user_plugins
@@ -712,6 +715,7 @@ vnoremap <silent> <leader>h> :call Pointful()<CR>
 " }}}
 
 " Customization {{{
+let g:jsx_ext_required = 0
 if filereadable(hvn_config_post)
   execute 'source '. hvn_config_post
 endif
