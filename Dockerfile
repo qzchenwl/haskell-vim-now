@@ -1,15 +1,15 @@
-FROM haskell:8.8
+FROM ubuntu:18.04
 
-# install vim tooling
-RUN apt-get update \
- && apt-get install -y sudo tree git vim curl wget build-essential apt-transport-https \
-      # for vim extensions
-      exuberant-ctags libcurl4-openssl-dev \
- && apt-get clean
+RUN add-apt-repository ppa:nmi/vim-snapshots -y && \
+    apt-get -qq update -y
+    apt-get install -y sudo tree git vim curl wget build-essential apt-transport-https exuberant-ctags libcurl4-openssl-dev ctags vim
 
-# install stack
-#RUN curl -sSL https://get.haskellstack.org/ | sh
+ENV PATH=$HOME/.local/bin:$PATH
 
-# Haskell Vim setup
+RUN mkdir -p $HOME/.local/bin && \
+    mkdir -p $HOME/.config/haskell-vim-now && \
+    curl -sSL https://get.haskellstack.org/ | sh
+
 ADD install.sh /install.sh
-RUN /bin/bash /install.sh
+RUN /bin/bash /install.sh --no-hoogle
+
