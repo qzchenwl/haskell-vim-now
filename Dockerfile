@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:12.04
 
 RUN apt-get -qq update -y && \
     apt-get install -y software-properties-common && \
