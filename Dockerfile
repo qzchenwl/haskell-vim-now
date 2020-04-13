@@ -1,7 +1,7 @@
-FROM ubuntu:18.04
+FROM centos:7
 
-RUN apt-get -qq update -y && \
-    apt-get install -y sudo tree git vim curl wget build-essential apt-transport-https exuberant-ctags libcurl4-openssl-dev ctags vim
+RUN yum group install -y "Development Tools"
+RUN yum install -y sudo tree git vim curl wget exuberant-ctags vim
 
 ENV PATH=/root/.local/bin:$PATH
 
