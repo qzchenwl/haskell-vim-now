@@ -1,7 +1,7 @@
 FROM centos:7
 
 RUN yum group install -y "Development Tools"
-RUN yum install -y sudo tree git vim curl wget exuberant-ctags vim
+RUN yum install -y sudo tree git vim curl wget exuberant-ctags vim par
 
 ENV PATH=/root/.local/bin:$PATH
 
