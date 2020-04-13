@@ -15,5 +15,5 @@ RUN apt-get update \
  && apt-get clean
 
 # Haskell Vim setup
-ADD https://raw.githubusercontent.com/begriffs/haskell-vim-now/master/install.sh /install.sh
+ADD install.sh /install.sh
 RUN /bin/bash /install.sh
