@@ -157,6 +157,7 @@ do_setup() {
       ARG_NIX="--nix"
     fi
 
+    echo "=============="
     ls -al
     stack --version
     stack $ARG_NIX $setup_haskell_path $ARG_NO_HOOGLE_DB $ARG_NO_HELPER_BINS ; RETCODE=$?
