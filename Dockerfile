@@ -1,4 +1,4 @@
-FROM haskell:7.8
+FROM haskell:8.8
 
 # install vim tooling
 RUN apt-get update \
