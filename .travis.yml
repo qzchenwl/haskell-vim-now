@@ -4,6 +4,7 @@ services:
   - docker
 
 script:
+  - env
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker build -t $DOCKER_USERNAME/haskell-vim-now .
   - docker push $DOCKER_USERNAME/haskell-vim-now
