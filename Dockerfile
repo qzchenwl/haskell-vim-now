@@ -11,9 +11,12 @@ RUN yum -y remove vim-minimal vim-common vim-enhanced && \
 
 ENV PATH=/root/.local/bin:$PATH
 
-RUN mkdir -p $HOME/.local/bin && \
+RUN mkdir -p $HOME/.local/bin  && \
     curl -sSL https://get.haskellstack.org/ | sh
 
 ADD install.sh /install.sh
-RUN export PATH=/root/.local/bin:$PATH && /bin/bash /install.sh --no-hoogle
+
+#RUN export http_proxy=http://192.168.1.249:1087 && export https_proxy=http://192.168.1.249:1087 && \
+#    /bin/bash /install.sh --no-hoogle
+RUN /bin/bash /install.sh --no-hoogle
 

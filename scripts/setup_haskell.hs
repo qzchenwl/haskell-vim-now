@@ -99,18 +99,18 @@ setupHaskell :: (MonadIO m, MonadReader HvnConfig m) => m ()
 setupHaskell = do
   HvnConfig {hvnCfgDest, hvnCfgHoogleDb, hvnCfgHelperBinaries} <- ask
   msg "Setting up GHC if needed..."
-  stackSetupResult <- Turtle.shell "stack setup --verbosity warning" empty
+  stackSetupResult <- Turtle.shell "stack setup" empty
   case stackSetupResult of
     (Turtle.ExitFailure retCode) -> do
       err $ "Stack setup failed with error " <> (Text.pack . show $ retCode)
       Turtle.exit (Turtle.ExitFailure 1)
     Turtle.ExitSuccess -> do
       stackBinPath <-
-        commandSubstitution "stack --verbosity 0 path --local-bin"
+        commandSubstitution "stack path --local-bin"
       stackGlobalDir <-
-        commandSubstitution "stack --verbosity 0 path --stack-root"
+        commandSubstitution "stack path --stack-root"
       stackGlobalConfig <-
-        commandSubstitution "stack --verbosity 0 path --config-location"
+        commandSubstitution "stack path --config-location"
       stackResolver <- stackResolverText . textToFilePath $ stackGlobalConfig
       detail $ "Stack bin path: " <> stackBinPath
       detail $ "Stack global path: " <> stackGlobalDir
@@ -217,7 +217,7 @@ stackInstall :: (MonadIO m) => Text -> Text -> Bool -> m ()
 stackInstall resolver package exitOnFailure = do
   let installCommand =
         "stack --resolver " <> resolver <> " install " <> package <>
-        " --install-ghc --verbosity warning"
+        " --install-ghc"
   detail installCommand
   installResult <- Turtle.shell installCommand empty
   case installResult of
