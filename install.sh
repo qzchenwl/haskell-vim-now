@@ -157,6 +157,8 @@ do_setup() {
       ARG_NIX="--nix"
     fi
 
+    ls -al
+    stack --version
     stack $ARG_NIX $setup_haskell_path $ARG_NO_HOOGLE_DB $ARG_NO_HELPER_BINS ; RETCODE=$?
     [ ${RETCODE} -ne 0 ] && exit_err "setup_haskell.hs failed with error ${RETCODE}."
   fi
