@@ -17,6 +17,6 @@ RUN mkdir -p $HOME/.local/bin  && \
 ADD install.sh /install.sh
 
 #RUN export http_proxy=http://192.168.1.249:1087 && export https_proxy=http://192.168.1.249:1087 && \
-#    /bin/bash /install.sh --no-hoogle
-RUN /bin/bash /install.sh --no-hoogle
+#    stack --resolver lts-14.12 setup && /bin/bash /install.sh --no-hoogle
+RUN stack --resolver lts-14.12 setup && /bin/bash /install.sh --no-hoogle
 
