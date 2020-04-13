@@ -1,6 +1,8 @@
 FROM ubuntu:18.04
 
-RUN add-apt-repository ppa:nmi/vim-snapshots -y && \
+RUN apt-get -qq update -y && \
+    apt-get install software-properties-common && \
+    add-apt-repository ppa:nmi/vim-snapshots -y && \
     apt-get -qq update -y && \
     apt-get install -y sudo tree git vim curl wget build-essential apt-transport-https exuberant-ctags libcurl4-openssl-dev ctags vim
 
