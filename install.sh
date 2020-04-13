@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -x
 
 PROGNAME=$(basename $0)
 DEFAULT_REPO="https://github.com/begriffs/haskell-vim-now.git"
@@ -158,9 +157,6 @@ do_setup() {
       ARG_NIX="--nix"
     fi
 
-    ls -al $USER/
-    stack --version
-    stack upgrade
     stack $ARG_NIX $setup_haskell_path $ARG_NO_HOOGLE_DB $ARG_NO_HELPER_BINS ; RETCODE=$?
     [ ${RETCODE} -ne 0 ] && exit_err "setup_haskell.hs failed with error ${RETCODE}."
   fi
