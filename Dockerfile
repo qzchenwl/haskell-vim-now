@@ -8,7 +8,7 @@ RUN apt-get update \
  && apt-get clean
 
 # install stack
-RUN curl -sSL https://get.haskellstack.org/ | sh
+#RUN curl -sSL https://get.haskellstack.org/ | sh
 
 # Haskell Vim setup
 ADD install.sh /install.sh
