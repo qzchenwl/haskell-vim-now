@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -x
 
 PROGNAME=$(basename $0)
 DEFAULT_REPO="https://github.com/begriffs/haskell-vim-now.git"
