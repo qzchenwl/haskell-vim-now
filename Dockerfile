@@ -15,5 +15,5 @@ RUN mkdir -p $HOME/.local/bin && \
     curl -sSL https://get.haskellstack.org/ | sh
 
 ADD install.sh /install.sh
-RUN /bin/bash /install.sh --no-hoogle
+RUN export PATH=/root/.local/bin:$PATH && /bin/bash /install.sh --no-hoogle
 
