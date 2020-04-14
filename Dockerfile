@@ -23,5 +23,6 @@ RUN mkdir -p $HOME/.local/bin  && \
 ADD install.sh /install.sh
 
 RUN stack --resolver lts-14.12 setup
+RUN ln -sv /usr/lib64/libtinfo.so.5 /usr/lib64/libtinfo.so
 RUN /bin/bash /install.sh --no-hoogle
 
