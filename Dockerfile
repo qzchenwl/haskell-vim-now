@@ -1,5 +1,11 @@
 FROM centos:7
 
+ARG http_proxy
+ARG https_proxy
+
+ENV http_proxy=$http_proxy
+ENV https_proxy=$https_proxy
+
 RUN rpm -Uvh http://packages.psychotic.ninja/7/base/x86_64/RPMS/par-1.52-16.el7.psychotic.x86_64.rpm && \
     rpm -Uvh http://mirror.ghettoforge.org/distributions/gf/gf-release-latest.gf.el7.noarch.rpm && \
     rpm --import http://mirror.ghettoforge.org/distributions/gf/RPM-GPG-KEY-gf.el7
@@ -16,7 +22,6 @@ RUN mkdir -p $HOME/.local/bin  && \
 
 ADD install.sh /install.sh
 
-#RUN export http_proxy=http://192.168.1.249:1087 && export https_proxy=http://192.168.1.249:1087 && \
-#    stack --resolver lts-14.12 setup && /bin/bash /install.sh --no-hoogle
-RUN stack --resolver lts-14.12 setup && /bin/bash /install.sh --no-hoogle
+RUN stack --resolver lts-14.12 setup
+RUN /bin/bash /install.sh --no-hoogle
 
